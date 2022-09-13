@@ -21,7 +21,7 @@ const questions = {
     ],
 };
 
-async function start() {
+async function begin() {
     while (true) {
         let answer = await inquirer.prompt(questions);
         await userAnswer(answer);
@@ -46,7 +46,7 @@ const userAnswer = async (answer) => {
             break;
 
         case "Add Department":
-            let answer = await inquirer.prompt({
+            var answer = await inquirer.prompt({
                 type: 'input',
                 message: 'What Department Do You Want To Add',
                 name: 'newDepartment',
@@ -55,6 +55,97 @@ const userAnswer = async (answer) => {
             await database.addDepartment(answer.newDepartment);
             break;
 
-        
+        case "Add Role":
+            var answer = await inquirer.prompt([
+                {
+                    type: 'input',
+                    message: 'What Role Do You Want To Add',
+                    name: 'newRole',
+                },
+                {
+                    type: 'input',
+                    message: 'What Is The Salary For This Role',
+                    name: 'Salary',
+                },
+                {
+                    type: 'input',
+                    message: 'What Is The Deapartment ID',
+                    name: 'ID',
+                },
+            ]);
+            console.log(answer);
+            await database.addRole(answer.newRole, answer.Salary, answer.ID);
+            break;
+
+        case "Add Employee":
+            console.log(answer);
+            let positions = await database.findAllRoles();
+            positions = positions[0].map((position) => position.title);
+            var answer = await inquirer.prompt([
+                {
+                    type: 'input',
+                    message: 'What Is The Employees First Name',
+                    name: 'newEmployee',
+                },
+                {
+                    type: 'input',
+                    message: 'What Is The Employees Last Name',
+                    name: 'newLastName',
+                },
+                {
+                    type: 'list',
+                    message: 'What Is The Employees Role ID',
+                    name: 'newPosition',
+                    choices: positions,
+                },
+                {
+                    type: 'input',
+                    message: 'What Is The Employees Managers ID',
+                    name: 'newEmployeeManager',
+                },
+            ]);
+            console.log(answer);
+            await database.addEmployee(
+                answer.newEmployee,
+                answer.newLastName,
+                answer.newPosition,
+                answer.newEmployeeManager
+            );
+            break;
+
+            case "Update Employee":
+                var employee = await database.findAllEmployees();
+                employees = employees[0].map(
+                    function(employee) {
+                        var object = {
+                            name: employee.last_name + "," + employee.first_name,
+                            value: employee.id 
+                        }
+                        return object
+                    }
+                )
+                console.log(employees);
+                var position = await database.findAllRoles();
+                positions = positions[0].map((position) => position.title);
+
+                var answer = await inquirer.prompt([
+                    {
+                        type: 'list',
+                        message: 'Which Employee Would You Like to Update',
+                        name: 'updateName',
+                        choices: employees
+                    },
+                    {
+                        type: 'list',
+                        message: 'What Is The Employees New Role',
+                        name: 'newRole',
+                        choices: positions,
+                    },
+                ]);
+                console.log(answer.updateName);
+                await database.updateEmployee(answer.updateName, answer.newRole);
+                break;
     }
-}
+};
+
+begin();
