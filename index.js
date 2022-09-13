@@ -1,21 +1,60 @@
 const inquirer = require('inquirer')
 const database = require('./db')
+const { findAllEmployees } = require('./db');
 
-employeeList = [];
-database.findAllEmployees().then(employees => {
-    console.log(employees[0])
-    employeeList = employees;
 
-    promptUser(employees[0])
-});
+const questions = {
+    type: 'list',
+    name: 'mainList',
+    message: 'what do you want to do?',
+    choices: [
+        "View Departments",
+        "View Employees",
+        "view Roles",
+        "Add Department",
+        "Add Role",
+        "Add Employee",
+        "Update Employee",
+        "Delete Department",
+        "Delete Role",
+        "Delete Employee"
+    ],
+};
 
-const promptUser = (employeeList) => {
-    return inquirer.prompt([
-        {
-            type: 'list',
-            name: 'employee-list',
-            message: 'Which employee would you like to select?',
-            choices: employeeList.map(employee => ({ name: employee.first_name, value: employee.id})
-        },
-    ])
+async function start() {
+    while (true) {
+        let answer = await inquirer.prompt(questions);
+        await userAnswer(answer);
+    }
+};
+
+const userAnswer = async (answer) => {
+    switch (answer.mainList) {
+        case "View Departments":
+            let departments = await database.findAllDepartments();
+            console.log(departments[0].map((department) => department.name));
+            break;
+
+        case "View Employees":
+            let employees = await database.findAllEmployees();
+            console.log(employees[0].map((employee) => employee.first_name));
+            break;
+
+        case "View Roles":
+            let roles = await database.findAllRoles();
+            console.log(roles[0].map((role) => role.title));
+            break;
+
+        case "Add Department":
+            let answer = await inquirer.prompt({
+                type: 'input',
+                message: 'What Department Do You Want To Add',
+                name: 'newDepartment',
+            });
+            console.log(answer);
+            await database.addDepartment(answer.newDepartment);
+            break;
+
+        
+    }
 }
